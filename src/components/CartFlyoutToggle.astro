@@ -1,0 +1,19 @@
+<button id="cartToggle">Cart</button>
+
+<script>
+  import { isCartOpen } from "../cartStore";
+  const cartButton = document.querySelector("#cartToggle");
+
+  isCartOpen.subscribe((open) => {
+    if (open) {
+      console.log("cart opened!");
+    } else {
+      console.log("cart closed");
+    }
+  });
+
+  cartButton.addEventListener("click", () => {
+    console.log("click!", isCartOpen.get());
+    isCartOpen.set(!isCartOpen.get());
+  });
+</script>

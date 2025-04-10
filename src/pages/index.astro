@@ -1,11 +1,26 @@
 ---
 import Base from "../layouts/Base.astro";
+import CartFlyoutToggle from "../components/CartFlyoutToggle.astro";
+import CartFlyout from "../components/CartFlyout.astro";
+import AddToCart from "../components/AddToCart.astro";
 ---
 
 <Base>
-
   <h1>Index</h1>
-  <a href="/checkout" class="button">Checkout</a>
+  <a href="/checkout?test=1,test2=3" class="button">Checkout</a>
+  <CartFlyoutToggle />
+  <CartFlyout />
+  <AddToCart
+    id="price_1RC2xVAJJ4GWZRKauTMTBvWI"
+    name="Astronaut Figurine 1"
+    price="price_1RC2xVAJJ4GWZRKauTMTBvWI"
+    imageSrc="/images/astronaut-figurine.png"
+  />
 
+  <AddToCart
+    id="price_1RCTSTAJJ4GWZRKaKWyQud2Z"
+    name="Astronaut Figurine 2"
+    price="price_1RCTSTAJJ4GWZRKaKWyQud2Z"
+    imageSrc="/images/astronaut-figurine.png"
+  />
 </Base>
-

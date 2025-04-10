@@ -1,0 +1,43 @@
+---
+// Usage: <GreetingHeadline greeting="Howdy" name="Partner" />
+const { id, name, imageSrc, price } = Astro.props;
+---
+
+<button
+  id={id}
+  data-id={id}
+  data-name={name}
+  data-price={price}
+  data-image-src={imageSrc}
+>
+  Add to Cart
+</button>
+
+<script>
+  import { isCartOpen, addCartItem } from "../cartStore";
+  // const addToCartButton: HTMLButtonElement = document.querySelector(`button`);
+  // const { id, name, price, imageSrc } = addToCartButton.dataset;
+
+  const buttons = document.querySelectorAll("[data-price]");
+
+  buttons.forEach((button) => {
+    console.log("button: ", button);
+    button.addEventListener("click", () => {
+      const { id, name, price, imageSrc } = button.dataset;
+      console.log({ id, name, price, imageSrc });
+      const item = { id, name, price, imageSrc };
+      addCartItem(item);
+      isCartOpen.set(true);
+    });
+  });
+  // console.log("this.dataset: ", this.dataset);
+
+  // console.log("addToCartButton: ", addToCartButton);
+
+  // addToCartButton.addEventListener("click", () => {
+  //   console.log({ id, name, price, imageSrc });
+  //   const item = { id, name, price, imageSrc };
+  //   addCartItem(item);
+  //   isCartOpen.set(true);
+  // });
+</script>

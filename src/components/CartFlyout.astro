@@ -1,0 +1,42 @@
+---
+import { isCartOpen } from "../cartStore";
+---
+
+<aside id="cart" hidden={!isCartOpen.get()}>Here is an aside</aside>
+
+<script>
+  import { isCartOpen, cartItems } from "../cartStore";
+  const cartAside: HTMLElement = document.querySelector("aside");
+
+  isCartOpen.subscribe((open) => {
+    if (open) {
+      cartAside.hidden = false;
+      console.log("cart opened!", cartItems.get());
+    } else {
+      cartAside.hidden = true;
+      console.log("cart closed");
+    }
+  });
+
+  cartItems.subscribe((items) => {
+    console.log("cart items: ", Object.values(cartItems.get()));
+    cartAside.innerHTML = `
+            ${
+              Object.values(cartItems.get()).length
+                ? `
+                ${Object.values(cartItems.get()).map(
+                  (cartItem) =>
+                    `<li>
+							<img src=${cartItem.imageSrc} alt=${cartItem.name} />
+							<div>
+								<h3>${cartItem.name}</h3>
+								<p>Quantity: ${cartItem.quantity}</p>
+							</div>
+						</li>`
+                )}
+              `
+                : "no items in cart"
+            }
+        `;
+  });
+</script>
