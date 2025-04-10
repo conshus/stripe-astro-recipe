@@ -2,13 +2,14 @@
 import Base from "../layouts/Base.astro";
 import Stripe from 'stripe'
 
-export const prenender = false 
+// export const prenender = false 
 const stripe = new Stripe(import.meta.env.STRIPE_KEY)
 const sessionID = Astro.url.searchParams.get('session_id')
 
 let session 
 try {
   session = await stripe.checkout.sessions.retrieve(sessionID)
+  // save data to firebase here
 } catch (e) {
   return Astro.redirect('/checkout')
 }
