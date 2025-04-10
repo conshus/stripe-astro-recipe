@@ -1,5 +1,5 @@
-import Stripe from 'stripe';
-import EasyPostClient from '@easypost/api';
+import Stripe from "stripe";
+import EasyPostClient from "@easypost/api";
 
 const stripe = new Stripe(import.meta.env.STRIPE_KEY);
 const client = new EasyPostClient(import.meta.env.EASYPOST_API_KEY);
@@ -8,14 +8,13 @@ export const GET: APIRoute = ({ params, request }) => {
   return new Response(
     JSON.stringify({
       message: "This was a GET!",
-    }),
+    })
   );
 };
 
-
 // Return a boolean indicating whether the shipping details are valid.
 async function validateShippingDetails(shippingDetails) {
-  console.log('validating address')
+  console.log("validating address");
   // TODO: Remove error and implement...
   // throw new Error(`
   //   Validate the shipping details the customer has entered.
@@ -31,13 +30,12 @@ async function validateShippingDetails(shippingDetails) {
       zip: shippingDetails.address.postal_code,
       country: shippingDetails.address.country,
     });
-  
-    console.log(address);
-    return;
-  
-  } catch(e){
-    console.log('error validating address: ',e);
-    return;
+
+    console.log(address.verifications.delivery.success);
+    return address.verifications.delivery.success;
+  } catch (e) {
+    console.log("error validating address: ", e);
+    return false;
   }
 }
 
@@ -48,16 +46,14 @@ function calculateShippingOptions(shippingDetails, session) {
   //   Calculate shipping options based on the customer's shipping details and the
   //   Checkout Session's line items.
   // `);
-  console.log('calculate shipping options!')
+  console.log("calculate shipping options!");
 }
-
-
 
 export const POST: APIRoute = async ({ request }) => {
   const body = await request.json();
   console.log("body: ", body);
   // const name = body.name;
-  const {checkout_session_id, shipping_details} = body;
+  const { checkout_session_id, shipping_details } = body;
 
   // 1. Retrieve the Checkout Session
   const session = await stripe.checkout.sessions.retrieve(checkout_session_id);
@@ -65,10 +61,22 @@ export const POST: APIRoute = async ({ request }) => {
   // console.log("session: ",session);
 
   // 2. Validate the shipping details
-  // validateShippingDetails(shipping_details)
+  // validateShippingDetails(shipping_details);
+  const addressValid = await validateShippingDetails(shipping_details);
   // if (!validateShippingDetails(shipping_details)) {
-  //   return res.json({type: 'error', message: 'We cannot ship to your address. Please choose a different address.'});
-  // }
+  if (!addressValid) {
+    console.log("address not valid!");
+    return new Response(
+      JSON.stringify({
+        type: "error",
+        message:
+          "We cannot ship to your address. Please choose a different address.",
+      }),
+      { status: 400 }
+    );
+
+    // return res.json({type: 'error', message: 'We cannot ship to your address. Please choose a different address.'});
+  }
 
   // 3. Calculate the shipping options
   calculateShippingOptions(shipping_details, session);
@@ -76,104 +84,106 @@ export const POST: APIRoute = async ({ request }) => {
   const shippingOptions = [
     {
       shipping_rate_data: {
-        type: 'fixed_amount', // Required: Must be 'fixed_amount' here
+        type: "fixed_amount", // Required: Must be 'fixed_amount' here
         fixed_amount: {
-          amount: 500,        // Amount in cents (e.g., $5.00)
-          currency: 'usd',    // Match the session currency
+          amount: 500, // Amount in cents (e.g., $5.00)
+          currency: "usd", // Match the session currency
         },
-        display_name: 'Standard Ground Shipping',
+        display_name: "Standard Ground Shipping",
         // Optional: Delivery estimate
         delivery_estimate: {
           minimum: {
-            unit: 'business_day',
+            unit: "business_day",
             value: 5,
           },
           maximum: {
-            unit: 'business_day',
+            unit: "business_day",
             value: 7,
           },
-        }
-      }
+        },
+      },
     },
     {
       shipping_rate_data: {
-        type: 'fixed_amount',
+        type: "fixed_amount",
         fixed_amount: {
-          amount: 1500,       // $15.00
-          currency: 'usd',
+          amount: 1500, // $15.00
+          currency: "usd",
         },
-        display_name: 'Express 2-Day Shipping',
+        display_name: "Express 2-Day Shipping",
         delivery_estimate: {
           minimum: {
-            unit: 'business_day',
+            unit: "business_day",
             value: 1,
           },
           maximum: {
-            unit: 'business_day',
+            unit: "business_day",
             value: 2,
           },
-        }
-      }
+        },
+      },
     },
     {
       // Example: Free shipping option (dynamically)
       shipping_rate_data: {
-        type: 'fixed_amount',
+        type: "fixed_amount",
         fixed_amount: {
-          amount: 0,          // $0.00
-          currency: 'usd',
+          amount: 0, // $0.00
+          currency: "usd",
         },
-        display_name: 'Free Standard Shipping (7-10 days)',
-          delivery_estimate: {
+        display_name: "Free Standard Shipping (7-10 days)",
+        delivery_estimate: {
           minimum: {
-            unit: 'business_day',
+            unit: "business_day",
             value: 7,
           },
           maximum: {
-            unit: 'business_day',
+            unit: "business_day",
             value: 10,
           },
-        }
-      }
-    }
+        },
+      },
+    },
   ];
 
   // 4. Update the Checkout Session with the customer's shipping details and shipping options
   if (shippingOptions) {
-      await stripe.checkout.sessions.update(checkout_session_id, {
-          collected_information: {shipping_details},
-          // shipping_options: shippingOptions,
-          shipping_options: shippingOptions,
-      });
-      return new Response(
-          JSON.stringify({
-              type:'object', value: {succeeded: true}
-          }),
-        );
-            // return res.json({type:'object', value: {succeeded: true}});
+    await stripe.checkout.sessions.update(checkout_session_id, {
+      collected_information: { shipping_details },
+      // shipping_options: shippingOptions,
+      shipping_options: shippingOptions,
+    });
+    return new Response(
+      JSON.stringify({
+        type: "object",
+        value: { succeeded: true },
+      })
+    );
+    // return res.json({type:'object', value: {succeeded: true}});
   } else {
-      return new Response(
-          JSON.stringify({
-              type:'error', message: "We can't find shipping options. Please try again."
-          }),
-        );
-    
-  //   return res.json({type:'error', message: "We can't find shipping options. Please try again."});
-  }  
+    return new Response(
+      JSON.stringify({
+        type: "error",
+        message: "We can't find shipping options. Please try again.",
+      })
+    );
+
+    //   return res.json({type:'error', message: "We can't find shipping options. Please try again."});
+  }
 };
-  
+
 export const DELETE: APIRoute = ({ request }) => {
   return new Response(
     JSON.stringify({
       message: "This was a DELETE!",
-    }),
+    })
   );
 };
-  
+
 export const ALL: APIRoute = ({ request }) => {
   return new Response(
     JSON.stringify({
       message: `This was a ${request.method}!`,
-    }),
+    })
   );
 };
