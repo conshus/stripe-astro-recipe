@@ -3,11 +3,13 @@ import Base from "../layouts/Base.astro";
 import CartFlyoutToggle from "../components/CartFlyoutToggle.astro";
 import CartFlyout from "../components/CartFlyout.astro";
 import AddToCart from "../components/AddToCart.astro";
+const { origin } = Astro.url;
 ---
 
 <Base>
   <h1>Index</h1>
-  <a href="/checkout?test=1,test2=3" class="button">Checkout</a>
+  <!-- <a id="checkout" href="/checkout?test=1&test2=3" class="button">Checkout</a> -->
+  <button id="checkout">Checkout</button>
   <CartFlyoutToggle />
   <CartFlyout />
   <AddToCart
@@ -24,3 +26,51 @@ import AddToCart from "../components/AddToCart.astro";
     imageSrc="/images/astronaut-figurine.png"
   />
 </Base>
+
+<script define:vars={{ origin }}>
+  const checkoutButton = document.querySelector("#checkout");
+  checkoutButton.addEventListener("click", () => {
+    console.log("checkout clicked!");
+    const storedDataString = localStorage.getItem("shoppingCart");
+
+    let retrievedCartData = []; // Default to empty array if nothing is found
+
+    // 2. Check if data actually exists for that key
+    if (storedDataString) {
+      try {
+        // 3. Convert the JSON string back into a JavaScript array/object
+        retrievedCartData = JSON.parse(storedDataString);
+        console.log(
+          "Cart data retrieved from localStorage:",
+          retrievedCartData
+        );
+
+        // Now you can use the retrievedCartData array like any other JavaScript array
+        if (retrievedCartData.length > 0) {
+          console.log("First item's name:", retrievedCartData[0].name);
+          //build checkout URL
+          console.log("origin: ", origin);
+          let queryParams = "";
+
+          for (let i = 0; i < retrievedCartData.length; i++) {
+            if (i > 0) {
+              queryParams += "&";
+            }
+            queryParams += `price${i}=${retrievedCartData[i].price}&quantity${i}=${retrievedCartData[i].quantity}`;
+          }
+          console.log("queryParams: ", queryParams);
+          // go to checkout page
+          const checkoutURL = `${origin}/checkout?${queryParams}`;
+          console.log("checkoutURL: ", checkoutURL);
+          window.location.href = checkoutURL;
+        }
+      } catch (e) {
+        console.error("Error parsing data from localStorage:", e);
+        // Handle potential errors if the stored data is not valid JSON
+        // Maybe clear the invalid item: localStorage.removeItem('shoppingCart');
+      }
+    } else {
+      console.log("No cart data found in localStorage.");
+    }
+  });
+</script>

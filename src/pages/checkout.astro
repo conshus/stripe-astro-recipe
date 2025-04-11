@@ -6,8 +6,47 @@ import Stripe from "stripe";
 
 const PUBLIC_STRIPE_KEY = import.meta.env.PUBLIC_STRIPE_KEY;
 const stripe = new Stripe(import.meta.env.STRIPE_KEY);
-const { origin } = Astro.url;
-console.log("Astro.request.url: ", Astro.request.url);
+const { origin, searchParams } = Astro.url;
+// const paramsString = window.location.search;
+console.log("Astro.request: ", Astro.request);
+console.log("searchParams: ", searchParams);
+let line_items = [];
+searchParams.forEach((value, key) => {
+  // console.log(value, key);
+  // console.log("key.slice(-1): ", key.slice(-1));
+  // console.log(
+  //   "key.substring(0, key.length-1): ",
+  //   key.substring(0, key.length - 1)
+  // );
+  // line_items[key.slice(-1)][key.substring(0, key.length - 1)] = value;
+  // 1. Extract the index number (convert to integer)
+  const index = parseInt(key.slice(-1), 10);
+
+  // 2. Extract the property name ('price' or 'quantity')
+  const propertyName = key.substring(0, key.length - 1);
+
+  // 3. Ensure the object at this index exists
+  if (!line_items[index]) {
+    line_items[index] = {}; // If it doesn't exist, create an empty object
+  }
+
+  // 4. Assign the value to the correct property on the object
+  //    Convert quantity to a number
+  if (propertyName === "quantity") {
+    line_items[index][propertyName] = parseInt(value, 10); // Convert quantity string to number
+  } else {
+    line_items[index][propertyName] = value; // Price remains a string
+  }
+});
+
+console.log("line_items: ", line_items);
+
+// The line_items array might have empty slots if indices weren't sequential,
+// although in your example they are. Filtering ensures a clean array.
+const final_line_items = line_items.filter(
+  (item) => item !== undefined && item !== null
+);
+
 const session = await stripe.checkout.sessions.create({
   ui_mode: "embedded",
   mode: "payment",
@@ -29,12 +68,13 @@ const session = await stripe.checkout.sessions.create({
       },
     },
   ],
-  line_items: [
-    {
-      price: "price_1RC2xVAJJ4GWZRKauTMTBvWI",
-      quantity: 1,
-    },
-  ],
+  line_items: final_line_items,
+  // line_items: [
+  //   {
+  //     price: "price_1RC2xVAJJ4GWZRKauTMTBvWI",
+  //     quantity: 1,
+  //   },
+  // ],
   return_url: `${origin}/return?session_id={CHECKOUT_SESSION_ID}`,
   // return_url:
   //   "https://stripeastrorecipe-cpdu--4321--83e74fed.local-credentialless.webcontainer.io/return?session_id={CHECKOUT_SESSION_ID}",
