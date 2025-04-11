@@ -56,3 +56,33 @@ export function addCartItem({
   // save to localStorage
   saveToLocalStorage(Object.values(cartItems.get()));
 }
+
+export function increaseCartItem(id: string) {
+  console.log("increase cart item!", id);
+  const existingEntry = cartItems.get()[id];
+  if (existingEntry) {
+    cartItems.setKey(id, {
+      ...existingEntry,
+      quantity: existingEntry.quantity + 1,
+    });
+  }
+  // save to localStorage
+  saveToLocalStorage(Object.values(cartItems.get()));
+}
+
+export function decreaseCartItem(id: string) {
+  console.log("decrease cart item!", id);
+  const existingEntry = cartItems.get()[id];
+  if (existingEntry) {
+    cartItems.setKey(id, {
+      ...existingEntry,
+      quantity: existingEntry.quantity - 1,
+    });
+  }
+  if (cartItems.get()[id].quantity === 0) {
+    // document.querySelector(`#${existingEntry.id}`).remove();
+    cartItems.setKey(id, undefined);
+  }
+  // save to localStorage
+  saveToLocalStorage(Object.values(cartItems.get()));
+}

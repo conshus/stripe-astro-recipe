@@ -5,7 +5,12 @@ import { isCartOpen } from "../cartStore";
 <aside id="cart" hidden={!isCartOpen.get()}>Here is an aside</aside>
 
 <script>
-  import { isCartOpen, cartItems } from "../cartStore";
+  import {
+    isCartOpen,
+    cartItems,
+    increaseCartItem,
+    decreaseCartItem,
+  } from "../cartStore";
   const cartAside: HTMLElement = document.querySelector("aside");
 
   isCartOpen.subscribe((open) => {
@@ -26,11 +31,11 @@ import { isCartOpen } from "../cartStore";
                 ? `
                 ${Object.values(cartItems.get()).map(
                   (cartItem) =>
-                    `<li>
+                    `<li id="item-${cartItem.id}">
 							<img src=${cartItem.imageSrc} alt=${cartItem.name} />
 							<div>
 								<h3>${cartItem.name}</h3>
-								<p>Quantity: ${cartItem.quantity}</p>
+								<p>Quantity: <button class="decrease-item-btn" data-itemid="${cartItem.id}">-</button> ${cartItem.quantity} <button class="increase-item-btn" data-itemid="${cartItem.id}">+</button></p>
 							</div>
 						</li>`
                 )}
@@ -38,5 +43,27 @@ import { isCartOpen } from "../cartStore";
                 : "no items in cart"
             }
         `;
+    // 2. Attach Event Listeners after HTML is in the DOM
+    const removeButtons = cartAside.querySelectorAll(".decrease-item-btn");
+    console.log("removeButtons: ", removeButtons);
+    removeButtons.forEach((button) => {
+      console.log("remove button: ", button);
+      button.addEventListener("click", () => {
+        const itemId = button.dataset.itemid; // Get the ID from data attribute
+        console.log("itemId: ", itemId);
+        decreaseCartItem(itemId);
+      });
+    });
+
+    // Optional: Attach listeners for the '+' buttons too
+    const addButtons = cartAside.querySelectorAll(".increase-item-btn");
+    addButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const itemId = button.dataset.itemid;
+        // Call your function to increase quantity for itemId
+        console.log("Increase quantity for:", itemId);
+        increaseCartItem(itemId);
+      });
+    });
   });
 </script>

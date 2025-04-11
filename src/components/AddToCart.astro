@@ -18,9 +18,9 @@ const { id, name, imageSrc, price } = Astro.props;
   // const addToCartButton: HTMLButtonElement = document.querySelector(`button`);
   // const { id, name, price, imageSrc } = addToCartButton.dataset;
 
-  const buttons = document.querySelectorAll("[data-price]");
+  const addCartButtons = document.querySelectorAll("[data-price]");
 
-  buttons.forEach((button) => {
+  addCartButtons.forEach((button) => {
     console.log("button: ", button);
     button.addEventListener("click", () => {
       const { id, name, price, imageSrc } = button.dataset;
