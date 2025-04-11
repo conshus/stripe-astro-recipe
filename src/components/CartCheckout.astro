@@ -1,36 +1,10 @@
 ---
-import Base from "../layouts/Base.astro";
-import CartFlyoutToggle from "../components/CartFlyoutToggle.astro";
-import CartFlyout from "../components/CartFlyout.astro";
-import AddToCart from "../components/AddToCart.astro";
-import CartCheckout from "../components/CartCheckout.astro";
 const { origin } = Astro.url;
 ---
 
-<Base>
-  <h1>Index</h1>
-  <!-- <a id="checkout" href="/checkout?test=1&test2=3" class="button">Checkout</a> -->
-  <a href="/index2">index 2</a>
-  <!-- <button id="checkout">Checkout</button> -->
-  <CartCheckout />
-  <CartFlyoutToggle />
-  <CartFlyout />
-  <AddToCart
-    id="price_1RC2xVAJJ4GWZRKauTMTBvWI"
-    name="Astronaut Figurine 1"
-    price="price_1RC2xVAJJ4GWZRKauTMTBvWI"
-    imageSrc="/images/astronaut-figurine.png"
-  />
+<button id="checkout">Checkout</button>
 
-  <AddToCart
-    id="price_1RCTSTAJJ4GWZRKaKWyQud2Z"
-    name="Astronaut Figurine 2"
-    price="price_1RCTSTAJJ4GWZRKaKWyQud2Z"
-    imageSrc="/images/astronaut-figurine.png"
-  />
-</Base>
-
-<!-- <script define:vars={{ origin }}>
+<script define:vars={{ origin }}>
   const checkoutButton = document.querySelector("#checkout");
   checkoutButton.addEventListener("click", () => {
     console.log("checkout clicked!");
@@ -76,4 +50,4 @@ const { origin } = Astro.url;
       console.log("No cart data found in localStorage.");
     }
   });
-</script> -->
+</script>

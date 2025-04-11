@@ -1,4 +1,5 @@
 import { atom, map } from "nanostores";
+import { persistentMap } from "@nanostores/persistent";
 
 export const isCartOpen = atom(false);
 
@@ -15,7 +16,15 @@ export type CartItemDisplayInfo = Pick<
   "id" | "name" | "price" | "imageSrc"
 >;
 
-export const cartItems = map<Record<string, CartItem>>({});
+// export const cartItems = map<Record<string, CartItem>>({});
+export const cartItems = persistentMap<Record<string, CartItem>>(
+  "settings:",
+  {},
+  {
+    encode: JSON.stringify,
+    decode: JSON.parse,
+  }
+);
 
 function saveToLocalStorage(cartData) {
   console.log("saveToLocalStorage cartData: ", cartData);
@@ -53,6 +62,7 @@ export function addCartItem({
       quantity: 1,
     });
   }
+  console.log("cartItems.get(): ", cartItems.get());
   // save to localStorage
   saveToLocalStorage(Object.values(cartItems.get()));
 }
